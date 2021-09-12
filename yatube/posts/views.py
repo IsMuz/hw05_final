@@ -31,21 +31,23 @@ def group_posts(request, slug):
 def profile(request, username):
     """Profile page with user posts"""
     author = get_object_or_404(User, username=username)
-    #
-    # f = Follow.objects.filter(
-    #     user=request.user,
-    #     author=author
-    # ).exists()
-    # if f or request.user.is_authenticated:
-    #     following = True
-    # elif request.user.is_authenticated:
-    #     following = False
+    f = False
+    following = False
+    if request.user.is_authenticated:
+        f = Follow.objects.filter(
+            user=request.user,
+            author=author
+        ).exists()
+    if f:
+        following = True
+    else:
+        following = False
     post_all = author.posts.all()
     page_obj = paginate(request, post_all)
     context = {
         'author': author,
         'page_obj': page_obj,
-        # 'following': following
+        'following': following
     }
     return render(request, 'posts/profile.html', context)
 
