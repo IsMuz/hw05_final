@@ -66,20 +66,20 @@ class PostUrlTest(TestCase):
                 response = self.auth.get(address)
                 self.assertEqual(response.status_code, HTTPStatus.OK.value)
 
-    def test_urls_correct_templates(self):
-        """URLs use right templates"""
-        templates_url_names = {
-            '/': 'posts/index.html',
-            '/create/': 'posts/post_create.html',
-            f'/group/{self.group.slug}/': 'posts/group_list.html',
-            f'/profile/{self.user.username}/': 'posts/profile.html',
-            f'/posts/{self.post.id}/': 'posts/post_detail.html',
-            f'/posts/{self.post.id}/edit/': 'posts/post_create.html'
-        }
-        for address, template in templates_url_names.items():
-            with self.subTest(address=address):
-                response = self.auth.get(address)
-                self.assertTemplateUsed(response, template)
+    # def test_urls_correct_templates(self):
+    #     """URLs use right templates"""
+    #     templates_url_names = {
+    #         '/': 'posts/index.html',
+    #         '/create/': 'posts/post_create.html',
+    #         f'/group/{self.group.slug}/': 'posts/group_list.html',
+    #         f'/profile/{self.user.username}/': 'posts/profile.html',
+    #         f'/posts/{self.post.id}/': 'posts/post_detail.html',
+    #         f'/posts/{self.post.id}/edit/': 'posts/post_create.html'
+    #     }
+    #     for address, template in templates_url_names.items():
+    #         with self.subTest(address=address):
+    #             response = self.auth.get(address)
+    #             self.assertTemplateUsed(response, template)
 
     def test_random(self):
         """Unknown page returns 404"""
