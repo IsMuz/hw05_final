@@ -8,6 +8,16 @@ from ..models import Group, Post, Follow
 
 User = get_user_model()
 
+# Не хватает тестов:
+# 2. Проверка, что если при создании поста указать группу, то этот пост появляется:
+#    - на главной странице сайта, разве это не проверяется в test_index_context?
+#    - на странице выбранной группы. а это в test_group_list_context
+# 3. Проверка, что этот пост не попал в группу, для которой не был предназначен.
+# 6. Проверка кэша на главной странице сайта.
+# 7. Проверка, что новая запись пользователя появляется в ленте тех, кто на него
+#    подписан и не появляется в ленте тех, кто не подписан на него.
+# 8. Проверка, что только авторизированный пользователь может комментировать посты.
+
 
 class PostViewTest(TestCase):
     @classmethod
@@ -53,58 +63,41 @@ class PostViewTest(TestCase):
             Post.objects.create(
                 text=f'test text {i}',
                 author=self.user,
-                group=self.group
+                group=self.group,
+                image=self.uploaded,
             )
 
-    # def test_pages_uses_correct_template(self):
-    #     """Urls use right templates"""
-    #     templates_page_names = {
-    #         reverse('posts:index'): 'posts/index.html',
-    #         reverse('posts:post_create'): 'posts/post_create.html',
-    #         reverse('posts:group',
-    #                 args=[self.group.slug]): 'posts/group_list.html',
-    #         reverse('posts:profile',
-    #                 args=[self.user.username]): 'posts/profile.html',
-    #         reverse('posts:post_detail',
-    #                 args=[self.post.id]): 'posts/post_detail.html',
-    #         reverse('posts:post_edit',
-    #                 args=[self.post.id]): 'posts/post_create.html',
-    #         reverse('posts:follow_index',
-    #                 args=[]): 'posts/follow.html',
-    #         reverse('posts:profile_follow',
-    #                 args=[self.user.username]): 'posts/index.html',
-    #         reverse('posts:profile_unfollow',
-    #                 args=[self.user.username]): 'posts/index.html',
-    #     }
-    #     for reverse_name, template in templates_page_names.items():
-    #         with self.subTest(template=template):
-    #             response = self.auth.get(reverse_name)
-    #             self.assertTemplateUsed(response, template)
-
-    def test_post_create_context(self):
-        """Template for post_create form generated with right context"""
-        response = self.auth.get(reverse('posts:post_create'))
-        form_fields = {
-            'text': forms.fields.CharField,
-            'group': forms.fields.ChoiceField,
+    def test_pages_uses_correct_template(self):
+        """Urls use right templates"""
+        templates_page_names = {
+            reverse('posts:index'): 'posts/index.html',
+            reverse('posts:post_create'): 'posts/post_create.html',
+            reverse('posts:group',
+                    args=[self.group.slug]): 'posts/group_list.html',
+            reverse('posts:profile',
+                    args=[self.user.username]): 'posts/profile.html',
+            reverse('posts:post_detail',
+                    args=[self.post.id]): 'posts/post_detail.html',
+            reverse('posts:post_edit',
+                    args=[self.post.id]): 'posts/post_create.html',
         }
-        for value, expected in form_fields.items():
-            with self.subTest(value=value):
-                form_field = response.context['form'].fields[value]
-                self.assertIsInstance(form_field, expected)
+        for reverse_name, template in templates_page_names.items():
+            with self.subTest(template=template):
+                response = self.auth.get(reverse_name)
+                self.assertTemplateUsed(response, template)
 
     def test_index_context(self):
         """Template index generated with right context"""
         response = self.auth.get(reverse('posts:index') + '?page=2')
         f_obj = response.context['page_obj'][5]
-        self.assert_equal_post(f_obj)
+        self.assert_equal_context(f_obj)
 
     def test_group_list_context(self):
         """Template group_list generated with right context"""
         response = self.auth.get(reverse('posts:group',
                                          args=[self.group.slug]))
         s_obj = response.context['page_obj'][0]
-        self.assert_equal_post(s_obj)
+        self.assert_equal_context(s_obj)
         self.assertEqual(response.context['group'].title,
                          self.group.title)
         self.assertEqual(response.context['group'].slug,
@@ -116,7 +109,7 @@ class PostViewTest(TestCase):
         response = self.auth.get(reverse('posts:profile',
                                          args=[self.user.username]))
         s_obj = response.context['page_obj'][0]
-        self.assert_equal_post(s_obj)
+        self.assert_equal_context(s_obj)
         self.assertEqual(response.context['author'].username,
                          self.user.username)
         self.assertEqual(response.context['author'].first_name,
@@ -132,27 +125,20 @@ class PostViewTest(TestCase):
         self.assertEqual(response.context['post'].group.title,
                          self.post.group.title)
 
-    def test_post_edit_context(self):
-        """Template for post_edit form generated with right context"""
-        response = self.auth.get(reverse('posts:post_edit',
-                                         args=[self.post.id]))
+    def test_index_fpage_paginator(self):
+        response = self.auth.get(reverse('posts:index'))
+        self.assertEqual(len(response.context['page_obj']), 10)
 
-        form_fields = {
-            'text': forms.fields.CharField,
-            'group': forms.fields.ChoiceField,
-        }
-        for value, expected in form_fields.items():
-            with self.subTest(value=value):
-                form_field = response.context['form'].fields[value]
-                self.assertIsInstance(form_field, expected)
+    def test_index_spage_paginator(self):
+        response = self.auth.get(reverse('posts:index') + '?page=2')
+        self.assertEqual(len(response.context['page_obj']), 6)
 
-    # def test_index_fpage_paginator(self):
-    #     response = self.auth.get(reverse('posts:index'))
-    #     self.assertEqual(len(response.context['page_obj']), 10)
-
-    # def test_index_spage_paginator(self):
-    #     response = self.auth.get(reverse('posts:index') + '?page=2')
-    #     self.assertEqual(len(response.context['page_obj']), 6)
+    def test_post_create_with_group(self):
+        p_count = Post.objects.count()
+        self.auth.post(
+            reverse('posts:post_create'),
+            follow=True,
+        )
 
     def test_sub(self):
         c_count = Follow.objects.count()
@@ -171,18 +157,16 @@ class PostViewTest(TestCase):
     def test_unsub(self):
         c_count = Follow.objects.count()
         self.auth.post(
+            reverse('posts:profile_follow', args=[self.user1.username]),
+            follow=True,
+        )
+        self.auth.post(
             reverse('posts:profile_unfollow', args=[self.user1.username]),
             follow=True,
         )
         self.assertEqual(Follow.objects.count(), c_count)
-        self.assertFalse(
-            Follow.objects.filter(
-                user=self.user,
-                author=self.user1
-            ).exists()
-        )
 
-    def assert_equal_post(self, obj):
+    def assert_equal_context(self, obj):
         post_text = obj.text
         post_author = obj.author.username
         post_group = obj.group.title

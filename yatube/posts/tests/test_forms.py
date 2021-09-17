@@ -31,11 +31,6 @@ class PostFormTests(TestCase):
             text='test text',
             group=cls.group
         )
-        # cls.comment = Comment.objects.create(
-        #     text='test',
-        #     author=cls.user,
-        #     post=cls.post,
-        # )
         cls.post_form = PostForm()
         cls.comment_form = CommentForm()
 
@@ -74,7 +69,8 @@ class PostFormTests(TestCase):
         self.assertTrue(
             Post.objects.filter(
                 text=form_data['text'],
-                group=form_data['group']
+                group=form_data['group'],
+                image=uploaded
             ).exists()
         )
 
@@ -111,5 +107,3 @@ class PostFormTests(TestCase):
             ).exists()
         )
 
-    def test_subscrition(self):
-        pass
