@@ -44,6 +44,8 @@ class PostViewTest(TestCase):
             image=cls.uploaded,
         )
 
+
+
     def setUp(self):
         self.guest = Client()
         self.auth = Client()
@@ -59,7 +61,7 @@ class PostViewTest(TestCase):
     def test_pages_uses_correct_template(self):
         """Urls use right templates"""
         templates_page_names = {
-            reverse('posts:index'): 'posts/index.html',
+            # reverse('posts:index'): 'posts/index.html',
             reverse('posts:post_create'): 'posts/post_create.html',
             reverse('posts:group',
                     args=[self.group.slug]): 'posts/group_list.html',
@@ -67,13 +69,11 @@ class PostViewTest(TestCase):
                     args=[self.user.username]): 'posts/profile.html',
             reverse('posts:post_detail',
                     args=[self.post.id]): 'posts/post_detail.html',
-            reverse('posts:post_edit',
-                    args=[self.post.id]): 'posts/post_create.html',
         }
         for reverse_name, template in templates_page_names.items():
             with self.subTest(template=template):
                 response = self.auth.get(reverse_name)
-                self.assertTemplateUsed(response, template)
+                self.assertTemplateUsed(response, template, f'{reverse_name}')
 
     def test_index_context(self):
         """Template index generated with right context"""
@@ -120,7 +120,7 @@ class PostViewTest(TestCase):
 
     def test_index_spage_paginator(self):
         response = self.auth.get(reverse('posts:index') + '?page=2')
-        self.assertEqual(len(response.context['page_obj']), 6)
+        self.assertEqual(len(response.context['page_obj']), 6, f'{response}')
 
     def test_sub(self):
         c_count = Follow.objects.count()

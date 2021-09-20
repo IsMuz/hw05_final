@@ -39,21 +39,15 @@ class PostUrlTest(TestCase):
             f'/profile/{self.user.username}/': 'posts/profile.html',
             f'/posts/{self.post.id}/': 'posts/post_detail.html',
         }
-        for address, template_, in templates_url_names.items():
+        for address, _template, in templates_url_names.items():
             with self.subTest(address=address):
                 response = self.guest.get(address)
-                self.assertEqual(response.status_code, HTTPStatus.OK)
+                self.assertEqual(response.status_code, HTTPStatus.OK, f'{address}')
 
     def test_urls_location_auth(self):
         """Pages accessed only by authorized user"""
-        templates_url_names = {
-            '/create/',
-            f'/posts/{self.post.id}/edit/',
-        }
-        for address in templates_url_names:
-            with self.subTest(address=address):
-                response = self.auth.get(address)
-                self.assertEqual(response.status_code, HTTPStatus.OK.value)
+        response = self.auth.get('/create/')
+        self.assertEqual(response.status_code, HTTPStatus.OK.value)
 
     def test_urls_correct_templates(self):
         """URLs use right templates"""
@@ -63,12 +57,11 @@ class PostUrlTest(TestCase):
             f'/group/{self.group.slug}/': 'posts/group_list.html',
             f'/profile/{self.user.username}/': 'posts/profile.html',
             f'/posts/{self.post.id}/': 'posts/post_detail.html',
-            f'/posts/{self.post.id}/edit/': 'posts/post_create.html'
         }
         for address, template in templates_url_names.items():
             with self.subTest(address=address):
                 response = self.auth.get(address)
-                self.assertTemplateUsed(response, template)
+                self.assertTemplateUsed(response, template, f'{address}')
 
     def test_random(self):
         """Unknown page returns 404"""

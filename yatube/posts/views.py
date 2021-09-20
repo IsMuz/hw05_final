@@ -123,19 +123,10 @@ def add_comment(request, post_id):
 
 @login_required
 def follow_index(request):
-    # информация о текущем пользователе доступна в переменной request.user
-    # ...
-    # posts = Post.objects.filter(author=request.user)
     follows = Follow.objects.filter(user=request.user)
     posts = Post.objects.filter(author__following__in=follows)
-    # posts = []
-    #
-    # for follow in follows:
-    #     user = User.objects.get(following=follow)
-    #     posts.append(user.posts.all())
     page_obj = paginate(request, posts)
     context = {
-        # 'posts': posts,
         'page_obj': page_obj,
     }
     return render(request, 'posts/follow.html', context)

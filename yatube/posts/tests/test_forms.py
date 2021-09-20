@@ -49,7 +49,7 @@ class PostFormTests(TestCase):
             b'\x02\x4c\x01\x00\x3b'
         )
         uploaded = SimpleUploadedFile(
-            name='small.gif',
+            name='test.gif',
             content=small_gif,
             content_type='image/gif'
         )
@@ -68,10 +68,9 @@ class PostFormTests(TestCase):
         self.assertEqual(Post.objects.count(), p_count + 1)
         self.assertTrue(
             Post.objects.filter(
-                text=form_data['text'],
-                group=form_data['group'],
-                image=uploaded
-            ).exists()
+                image=form_data['image']
+            ).exists(),
+            f''
         )
 
     def test_post_edit(self):
