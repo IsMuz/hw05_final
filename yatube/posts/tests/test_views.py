@@ -12,6 +12,18 @@ class PostViewTest(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x01\x00'
+            b'\x01\x00\x00\x00\x00\x21\xf9\x04'
+            b'\x01\x0a\x00\x01\x00\x2c\x00\x00'
+            b'\x00\x00\x01\x00\x01\x00\x00\x02'
+            b'\x02\x4c\x01\x00\x3b'
+        )
+        cls.uploaded = SimpleUploadedFile(
+            name='test.gif',
+            content=cls.small_gif,
+            content_type='image/gif'
+        )
         cls.user = User.objects.create_user(
             username='auth',
             first_name='leo'
@@ -40,6 +52,7 @@ class PostViewTest(TestCase):
                 text=f'test text {i}',
                 author=self.user,
                 group=self.group,
+                image=self.uploaded
             )
 
     def test_pages_uses_correct_template(self):
@@ -98,14 +111,15 @@ class PostViewTest(TestCase):
         self.assertEqual(response.context['post'].group.title,
                          self.post.group.title)
 
-    def test_index_fpage_paginator(self):
+    def test_profile_fpage_paginator(self):
         response = self.auth.get(reverse('posts:profile',
                                          args=[self.user.username]))
         self.assertEqual(len(response.context['page_obj']), 10)
 
-    def test_index_spage_paginator(self):
+    def test_profile_spage_paginator(self):
         response = self.auth.get(reverse('posts:profile',
-                                         args=[self.user.username]) + '?page=2')
+                                         args=[self.user.username])
+                                 + '?page=2')
         self.assertEqual(len(response.context['page_obj']), 6)
 
     def test_sub(self):
