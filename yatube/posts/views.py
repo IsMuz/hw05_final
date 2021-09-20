@@ -13,7 +13,10 @@ def index(request):
     """Project main page with all posts listed"""
     post_list = Post.objects.all().order_by('-pub_date')
     page_obj = paginate(request, post_list)
-    return render(request, 'posts/index.html', {'page_obj': page_obj})
+    context = {
+        "page_obj": page_obj,
+    }
+    return render(request, 'posts/index.html', context)
 
 
 def group_posts(request, slug):

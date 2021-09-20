@@ -53,7 +53,6 @@ class PostUrlTest(TestCase):
     def test_urls_correct_templates(self):
         """URLs use right templates"""
         templates_url_names = {
-            '/': 'posts/index.html',
             '/create/': 'posts/post_create.html',
             f'/group/{self.group.slug}/': 'posts/group_list.html',
             f'/profile/{self.user.username}/': 'posts/profile.html',
