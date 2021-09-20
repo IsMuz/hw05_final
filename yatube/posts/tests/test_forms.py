@@ -70,7 +70,6 @@ class PostFormTests(TestCase):
             Post.objects.filter(
                 image=form_data['image']
             ).exists(),
-            f''
         )
 
     def test_post_edit(self):

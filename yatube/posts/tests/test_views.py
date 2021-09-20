@@ -44,8 +44,6 @@ class PostViewTest(TestCase):
             image=cls.uploaded,
         )
 
-
-
     def setUp(self):
         self.guest = Client()
         self.auth = Client()

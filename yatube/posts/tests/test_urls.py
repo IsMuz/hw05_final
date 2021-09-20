@@ -42,7 +42,8 @@ class PostUrlTest(TestCase):
         for address, _template, in templates_url_names.items():
             with self.subTest(address=address):
                 response = self.guest.get(address)
-                self.assertEqual(response.status_code, HTTPStatus.OK, f'{address}')
+                self.assertEqual(response.status_code,
+                                 HTTPStatus.OK, f'{address}')
 
     def test_urls_location_auth(self):
         """Pages accessed only by authorized user"""
