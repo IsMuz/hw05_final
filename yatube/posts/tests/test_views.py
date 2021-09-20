@@ -1,4 +1,3 @@
-from django import forms
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
@@ -7,16 +6,6 @@ from django.urls import reverse
 from ..models import Group, Post, Follow
 
 User = get_user_model()
-
-# Не хватает тестов:
-# 2. Проверка, что если при создании поста указать группу, то этот пост появляется:
-#    - на главной странице сайта, разве это не проверяется в test_index_context?
-#    - на странице выбранной группы. а это в test_group_list_context
-# 3. Проверка, что этот пост не попал в группу, для которой не был предназначен.
-# 6. Проверка кэша на главной странице сайта.
-# 7. Проверка, что новая запись пользователя появляется в ленте тех, кто на него
-#    подписан и не появляется в ленте тех, кто не подписан на него.
-# 8. Проверка, что только авторизированный пользователь может комментировать посты.
 
 
 class PostViewTest(TestCase):
@@ -132,13 +121,6 @@ class PostViewTest(TestCase):
     def test_index_spage_paginator(self):
         response = self.auth.get(reverse('posts:index') + '?page=2')
         self.assertEqual(len(response.context['page_obj']), 6)
-
-    def test_post_create_with_group(self):
-        p_count = Post.objects.count()
-        self.auth.post(
-            reverse('posts:post_create'),
-            follow=True,
-        )
 
     def test_sub(self):
         c_count = Follow.objects.count()

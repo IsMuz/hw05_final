@@ -106,4 +106,3 @@ class PostFormTests(TestCase):
                 text=form_data['text'],
             ).exists()
         )
-
