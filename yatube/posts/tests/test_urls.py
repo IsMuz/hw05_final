@@ -27,9 +27,7 @@ class PostUrlTest(TestCase):
     def setUp(self):
         self.guest = Client()
         self.auth = Client()
-        self.auth1 = Client()
         self.auth.force_login(self.user)
-        self.auth.force_login(self.user1)
 
     def test_urls_location_guest(self):
         """Pages accessed by guest user"""
@@ -75,10 +73,7 @@ class PostUrlTest(TestCase):
                              '/auth/login/?next=%2Fposts%2F1%2Fedit%2F')
 
     def test_edit_post_redirect_not_author(self):
-        response = self.auth1.get(f'/posts/{self.post.id}/edit/')
-        self.assertRedirects(response,
-                             '/auth/login/?next=%2Fposts%2F1%2Fedit%2F')
-
-    def test_edit_post_redirect_auth(self):
+        self.auth.force_login(self.user1)
         response = self.auth.get(f'/posts/{self.post.id}/edit/')
-        self.assertRedirects(response, f'/posts/{self.post.id}/')
+        self.assertRedirects(response,
+                             f'/posts/{self.post.id}/')
