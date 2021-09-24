@@ -6,7 +6,6 @@ from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
-from itertools import islice
 
 from ..models import Group, Post, Follow, Comment
 

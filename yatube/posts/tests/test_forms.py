@@ -99,5 +99,3 @@ class PostFormTests(TestCase):
                 group=None
             ).exists()
         )
-
-
