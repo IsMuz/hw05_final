@@ -8,7 +8,7 @@ from .models import Group, Post, User, Follow
 from .utils import paginate
 
 
-@cache_page(60 * 20)
+@cache_page(60)
 def index(request):
     """Project main page with all posts listed"""
     post_list = Post.objects.all().order_by('-pub_date')
@@ -35,7 +35,6 @@ def profile(request, username):
     """Profile page with user posts"""
     author = get_object_or_404(User, username=username)
     f = False
-    following = False
     if request.user.is_authenticated:
         f = Follow.objects.filter(
             user=request.user,
@@ -158,5 +157,4 @@ def profile_follow(request, username):
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
     Follow.objects.filter(author=author).delete()
-    # return redirect(request, 'posts/index.html')
     return render(request, 'posts/index.html')

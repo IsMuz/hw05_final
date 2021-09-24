@@ -1,14 +1,20 @@
+import shutil
+import tempfile
+
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from ..forms import PostForm, CommentForm
-from ..models import Group, Post, Comment
+from ..models import Group, Post
 
 User = get_user_model()
 
+MEDIA_ROOT = tempfile.mkdtemp()
 
+
+@override_settings(MEDIA_ROOT=MEDIA_ROOT)
 class PostFormTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -33,6 +39,11 @@ class PostFormTests(TestCase):
         )
         cls.post_form = PostForm()
         cls.comment_form = CommentForm()
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(MEDIA_ROOT, ignore_errors=True)
+        super().tearDownClass()
 
     def setUp(self):
         self.guest = Client()
@@ -89,19 +100,4 @@ class PostFormTests(TestCase):
             ).exists()
         )
 
-    def test_post_comment(self):
-        c_count = Comment.objects.count()
-        form_data = {
-            'text': 'test1',
-        }
-        self.auth.post(
-            reverse('posts:add_comment', args=[self.post.id]),
-            data=form_data,
-            follow=True,
-        )
-        self.assertEqual(Comment.objects.count(), c_count + 1)
-        self.assertTrue(
-            Comment.objects.filter(
-                text=form_data['text'],
-            ).exists()
-        )
+

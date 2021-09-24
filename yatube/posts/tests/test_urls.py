@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
+from django.core.cache import cache
 
 from ..models import Group, Post
 
@@ -50,7 +51,9 @@ class PostUrlTest(TestCase):
 
     def test_urls_correct_templates(self):
         """URLs use right templates"""
+        cache.clear()
         templates_url_names = {
+            '/': 'posts/index.html',
             '/create/': 'posts/post_create.html',
             f'/group/{self.group.slug}/': 'posts/group_list.html',
             f'/profile/{self.user.username}/': 'posts/profile.html',
@@ -60,6 +63,7 @@ class PostUrlTest(TestCase):
             with self.subTest(address=address):
                 response = self.auth.get(address)
                 self.assertTemplateUsed(response, template, f'{address}')
+                self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_random(self):
         """Unknown page returns 404"""

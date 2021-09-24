@@ -4,7 +4,6 @@
 {% include 'includes/switcher.html' %}
 {% load thumbnail %}
 {% load cache %}
-{% cache 500 index_page %}
 {% for post in page_obj %}
   </br>
   <ul>
@@ -41,6 +40,5 @@
     <hr>
   {% endif %}
 {% endfor %}
-{% endcache %}
 {% include "includes/paginator.html" %}
 {% endblock %}
